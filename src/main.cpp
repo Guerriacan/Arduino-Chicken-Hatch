@@ -8,19 +8,20 @@
   =======================================
 */
 
-
 //====== ENABLE OR DISABLE DEBUG ======
 //=====================================
 #define DISABLE_DEBUG
 //=====================================
 //====== ENABLE OR DISABLE DEBUG ======
 
-
 //============== DEBUG ================
 #if true
 
 #define DEBUG_BEGIN Serial.begin(9600)
-#define DEBUG_WAIT while(!Serial) {}
+#define DEBUG_WAIT \
+  while (!Serial)  \
+  {                \
+  }
 #define DEBUG(x) Serial.println(x)
 
 #else
@@ -31,7 +32,6 @@
 
 #endif
 //============== DEBUG ================
-
 
 //============== PINOUT ===============
 const byte PinEnable = 2;
@@ -44,7 +44,6 @@ const byte PinEndSwitchUp = 7;
 const byte PinEndSwitchDown = 8;
 const byte PinBlocking = 9;
 //============== PINOUT ===============
-
 
 //============ VARIABLES ==============
 int LightOpenLevel = 500;
@@ -61,177 +60,78 @@ boolean StateEndSwitchDown = 0;
 boolean StateBlocking = 0;
 //============ VARIABLES ==============
 
-
-//============== SETUP ================
-void setup() {
-
-
-    //============= PINMODE ===============
-    pinMode(PinEnable, OUTPUT);
-    pinMode(PinDirecA, OUTPUT);
-    pinMode(PinDirecB, OUTPUT);
-
-    pinMode(PinLightSensor, INPUT);
-
-    pinMode(PinButton, INPUT_PULLUP);
-    pinMode(PinEndSwitchUp, INPUT_PULLUP);
-    pinMode(PinEndSwitchDown, INPUT_PULLUP);
-    pinMode(PinBlocking, INPUT);
-    //============= PINMODE ===============
-
-
-    //============== DEBUG ================
-    DEBUG_BEGIN;
-    DEBUG_WAIT;
-
-    DEBUG("=========================================");
-    DEBUG("============ CONEXION ETABLIE ===========");
-    DEBUG("========= TRAPPE OPERATIONNELLE =========");
-    DEBUG("=========================================");
-    DEBUG("");
-    //============== DEBUG ================
-
-
+void stop()
+{
+  digitalWrite(PinEnable, LOW);
+  delay(10);
+  digitalWrite(PinDirecA, HIGH);
+  digitalWrite(PinDirecB, LOW);
 }
-//============== SETUP ================
-void Reset() {
-    digitalWrite(PinEnable, LOW);
+
+void run(bool way)
+{
+  if (way == 0)
+  {
+    digitalWrite(PinDirecA, LOW);
+    digitalWrite(PinDirecB, HIGH);
     delay(10);
+    digitalWrite(PinEnable, HIGH);
+  }
+  else
+  {
     digitalWrite(PinDirecA, HIGH);
     digitalWrite(PinDirecB, LOW);
-    SecurityTimer = 0;
-    DEBUG("=============== RESET DONE ==============");
+    delay(10);
+    digitalWrite(PinEnable, HIGH);
+  }
 }
 
-void Opening() {
-    DEBUG("Check de l'ouverture...");
-    StateEndSwitchUp = digitalRead(PinEndSwitchUp);
-    if (StateEndSwitchUp == 1) {
-        DEBUG("La trappe n'est pas ouverte");
-        LastOpenClose = 0;
-        AddToLOC = 1;
-        digitalWrite(PinDirecA, LOW); //one way
-        digitalWrite(PinDirecB, HIGH);
-        delay(10);
-        digitalWrite(PinEnable, HIGH); //enable on
-        DEBUG("Ouverture...");
-        while (StateEndSwitchUp == 1) {
-            StateEndSwitchUp = digitalRead(PinEndSwitchUp);
-            SecurityTimer ++;
-            if (SecurityTimer >= 4000) {
-                DEBUG("================ ERROR ==================");
-                Reset();
-                DEBUG("================ ERROR ==================");
-                Closing();
-                DEBUG("================ ERROR ==================");
-                break;
-            }
-            delay(10);
-        }
-        DEBUG("Trappe ouverte !");
-    }
-    else {
-        DEBUG("La trappe est deja ouverte !");
-    }
+void setup()
+{
 
-}
+  //============= PINMODE ===============
+  pinMode(PinEnable, OUTPUT);
+  pinMode(PinDirecA, OUTPUT);
+  pinMode(PinDirecB, OUTPUT);
 
-void Closing() {
-    DEBUG("Check de la fermeture...");
-    StateEndSwitchDown = digitalRead(PinEndSwitchDown);
-    if (StateEndSwitchDown == 1) {
-        DEBUG("La trappe n'est pas fermee");
-        LastOpenClose = 0;
-        AddToLOC = 1;
-        digitalWrite(PinDirecA, HIGH); //one way
-        digitalWrite(PinDirecB, LOW);
-        delay(10);
-        digitalWrite(PinEnable, HIGH); //enable on
-        DEBUG("Fermeture...");
-        while (StateEndSwitchDown == 1) {
-            StateEndSwitchDown = digitalRead(PinEndSwitchDown);
-            SecurityTimer ++;
-            if (SecurityTimer >= 2900) {
-                DEBUG("================ ERROR ==================");
-                Reset();
-                DEBUG("================ ERROR ==================");
-                Opening();
-                DEBUG("================ ERROR ==================");
-                break;
-            }
-            delay(10);
-        }
-        DEBUG("Trappe fermee !");
-    }
-    else {
-        DEBUG("La trappe est deja fermee !");
-    }
-}
+  pinMode(PinLightSensor, INPUT);
 
-void CheckButton() {
-    DEBUG("Check de l'etat du bouton...");
-    StateButton = digitalRead(PinButton);
-    if (StateButton == 0) {
-        DEBUG("Bouton appuye");
-        StateEndSwitchUp = digitalRead(PinEndSwitchUp);
-        if (StateEndSwitchUp == 1) {
-            Opening();
-        }
-        else {
-            Closing();
-        }
-        LastOpenClose = 64990;
-    }
-    else {
-        DEBUG("Bouton relache");
-    }
-}
+  pinMode(PinButton, INPUT_PULLUP);
+  pinMode(PinEndSwitchUp, INPUT_PULLUP);
+  pinMode(PinEndSwitchDown, INPUT_PULLUP);
+  pinMode(PinBlocking, INPUT);
+  //============= PINMODE ===============
 
-void CheckLight() {
-    DEBUG("Check si il fait jour/nuit...");
-    LightSensorLevel = analogRead(PinLightSensor);
-    if (LastOpenClose > 65000) {
-        AddToLOC = 0;
-        if (LightSensorLevel < LightOpenLevel) {
-            DEBUG("Il fait jour");
-            Opening();
-        }
-        else if (LightSensorLevel > LightCloseLevel) {
-            DEBUG("Il fait nuit");
-            Closing();
-        }
-    }
-}
+  //============== DEBUG ================
+  DEBUG_BEGIN;
+  DEBUG_WAIT;
 
-void CheckBlocking() {
-    DEBUG("Check du mode de fonctionnement...");
-    StateBlocking = digitalRead(PinBlocking);
-    if (StateBlocking == 0) {
-        DEBUG("Mode automatique");
-        CheckLight();
-    }
-    else {
-        DEBUG("Mode manuel");
-        CheckButton();
-    }
+  DEBUG("=========================================");
+  DEBUG("============ CONEXION ETABLIE ===========");
+  DEBUG("========= TRAPPE OPERATIONNELLE =========");
+  DEBUG("=========================================");
+  DEBUG("");
+  //============== DEBUG ================
 }
 
 //============== LOOP =================
-void loop() {
-    DEBUG("============= DEBUT DE LOOP =============");
-    DEBUG("=============  Variables :  =============");
-    //LightSensorLevel = analogRead(PinLightSensor);
-    DEBUG(LightSensorLevel);
-    DEBUG(LastOpenClose);
-    DEBUG("=========================================");
-    CheckBlocking();
-    Reset();
-    DEBUG("============== FIN DE LOOP ==============");
-    DEBUG("");
-    DEBUG("");
-    delay(5);
-    if (AddToLOC == 1) {
-        LastOpenClose++;
-    }
+void loop()
+{
+  DEBUG("============= DEBUT DE LOOP =============");
+  DEBUG("=============  Variables :  =============");
+  // LightSensorLevel = analogRead(PinLightSensor);
+  DEBUG(LightSensorLevel);
+  DEBUG(LastOpenClose);
+  DEBUG("=========================================");
+  CheckBlocking();
+  Reset();
+  DEBUG("============== FIN DE LOOP ==============");
+  DEBUG("");
+  DEBUG("");
+  delay(5);
+  if (AddToLOC == 1)
+  {
+    LastOpenClose++;
+  }
 }
 //============== LOOP =================
