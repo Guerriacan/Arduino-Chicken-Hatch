@@ -1,20 +1,7 @@
 #include <Arduino.h>
 
-/*
-  =======================================
-  ==  Project name : Trappe Poule V2   ==
-  ==        Author : Guerriacan        ==
-  ==   Last Update : 19/10/2020 19:00  ==
-  =======================================
-*/
-
-//====== ENABLE OR DISABLE DEBUG ======
-//=====================================
-#define DISABLE_DEBUG
-//=====================================
-//====== ENABLE OR DISABLE DEBUG ======
-
-//============== DEBUG ================
+//debug
+//define to true to enable debug
 #if true
 
 #define DEBUG_BEGIN Serial.begin(9600)
@@ -31,21 +18,30 @@
 #define DEBUG(x)
 
 #endif
-//============== DEBUG ================
 
-//============== PINOUT ===============
-const byte PinEnable = 2;
-const byte PinDirecA = 3;
-const byte PinDirecB = 4;
 
-const byte PinLightSensor = A0;
-const byte PinButton = 6;
-const byte PinEndSwitchUp = 7;
-const byte PinEndSwitchDown = 8;
-const byte PinBlocking = 9;
-//============== PINOUT ===============
+//pins
+#define pinEnable = 2;
+#define pinDirecA = 3;
+#define pinDirecB = 4;
 
-//============ VARIABLES ==============
+#define pinLightSensor = A0;
+#define pinEndSwitchUp = 7;
+#define pinEndSwitchDown = 8;
+
+#define pinButtonUp = 9;
+#define pinButtonUpLed = 12;
+
+#define pinButtonCenter = 10;
+#define pinButtonCenterRed = 13;
+#define pinButtonCenterGreen = 14;
+#define pinButtonCenterBlue = 15;
+
+#define pinButtonDown = 11;
+#define pinButtonDownLed = 16;
+
+
+//variables
 int LightOpenLevel = 500;
 int LightCloseLevel = 900;
 
@@ -58,80 +54,46 @@ boolean StateButton = 0;
 boolean StateEndSwitchUp = 0;
 boolean StateEndSwitchDown = 0;
 boolean StateBlocking = 0;
-//============ VARIABLES ==============
 
-void stop()
-{
-  digitalWrite(PinEnable, LOW);
-  delay(10);
-  digitalWrite(PinDirecA, HIGH);
-  digitalWrite(PinDirecB, LOW);
-}
-
-void run(bool way)
-{
-  if (way == 0)
-  {
-    digitalWrite(PinDirecA, LOW);
-    digitalWrite(PinDirecB, HIGH);
-    delay(10);
-    digitalWrite(PinEnable, HIGH);
-  }
-  else
-  {
-    digitalWrite(PinDirecA, HIGH);
-    digitalWrite(PinDirecB, LOW);
-    delay(10);
-    digitalWrite(PinEnable, HIGH);
-  }
-}
 
 void setup()
 {
+  //set pins mode
+  pinMode(pinEnable, OUTPUT);
+  pinMode(pinDirecA, OUTPUT);
+  pinMode(pinDirecB, OUTPUT);
 
-  //============= PINMODE ===============
-  pinMode(PinEnable, OUTPUT);
-  pinMode(PinDirecA, OUTPUT);
-  pinMode(PinDirecB, OUTPUT);
+  pinMode(pinLightSensor, INPUT);
+  pinMode(pinEndSwitchUp, INPUT_PULLUP);
+  pinMode(pinEndSwitchDown, INPUT_PULLUP);
 
-  pinMode(PinLightSensor, INPUT);
+  pinMode(pinButtonUp, INPUT_PULLUP);
+  pinMode(pinButtonUpLed, OUTPUT);
 
-  pinMode(PinButton, INPUT_PULLUP);
-  pinMode(PinEndSwitchUp, INPUT_PULLUP);
-  pinMode(PinEndSwitchDown, INPUT_PULLUP);
-  pinMode(PinBlocking, INPUT);
-  //============= PINMODE ===============
+  pinMode(pinButtonCenter, INPUT_PULLUP);
+  pinMode(pinButtonCenterRed, OUTPUT);
+  pinMode(pinButtonCenterGreen, OUTPUT);
+  pinMode(pinButtonCenterBlue, OUTPUT);
 
-  //============== DEBUG ================
-  DEBUG_BEGIN;
-  DEBUG_WAIT;
+  pinMode(pinButtonDown, INPUT_PULLUP);
+  pinMode(pinButtonDownLed, OUTPUT);
 
-  DEBUG("=========================================");
-  DEBUG("============ CONEXION ETABLIE ===========");
-  DEBUG("========= TRAPPE OPERATIONNELLE =========");
-  DEBUG("=========================================");
-  DEBUG("");
-  //============== DEBUG ================
+  //set pins default state
+  digitalWrite(pinEnable, LOW);
+  digitalWrite(pinDirecA, LOW);
+  digitalWrite(pinDirecB, LOW);
+
+  digitalWrite(pinButtonUpLed, LOW);
+
+  digitalWrite(pinButtonCenterRed, LOW);
+  digitalWrite(pinButtonCenterGreen, LOW);
+  digitalWrite(pinButtonCenterBlue, LOW);
+
+  digitalWrite(pinButtonDownLed, LOW);
 }
 
-//============== LOOP =================
+
 void loop()
 {
-  DEBUG("============= DEBUT DE LOOP =============");
-  DEBUG("=============  Variables :  =============");
-  // LightSensorLevel = analogRead(PinLightSensor);
-  DEBUG(LightSensorLevel);
-  DEBUG(LastOpenClose);
-  DEBUG("=========================================");
-  CheckBlocking();
-  Reset();
-  DEBUG("============== FIN DE LOOP ==============");
-  DEBUG("");
-  DEBUG("");
-  delay(5);
-  if (AddToLOC == 1)
-  {
-    LastOpenClose++;
-  }
+
 }
-//============== LOOP =================
