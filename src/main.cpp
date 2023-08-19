@@ -1,44 +1,28 @@
 #include <Arduino.h>
-
-//debug
-//define to true to enable debug
-#if true
-
-#define DEBUG_BEGIN Serial.begin(9600)
-#define DEBUG_WAIT \
-  while (!Serial)  \
-  {                \
-  }
-#define DEBUG(x) Serial.println(x)
-
-#else
-
-#define DEBUG_BEGIN
-#define DEBUG_WAIT
-#define DEBUG(x)
-
-#endif
-
+#include <EEPROM.h>
+#include <OneButton.h>
+#include <TimerOne.h>
+#include <arduino-timer.h>
 
 //pins
-#define pinEnable = 2;
-#define pinDirecA = 3;
-#define pinDirecB = 4;
+#define pinEnable 2
+#define pinDirecA 3
+#define pinDirecB 4
 
-#define pinLightSensor = A0;
-#define pinEndSwitchUp = 7;
-#define pinEndSwitchDown = 8;
+#define pinLightSensor A0
+#define pinEndSwitchUp 7
+#define pinEndSwitchDown 8
 
-#define pinButtonUp = 9;
-#define pinButtonUpLed = 12;
+#define pinButtonUp 9
+#define pinLedUp 12
 
-#define pinButtonCenter = 10;
-#define pinButtonCenterRed = 13;
-#define pinButtonCenterGreen = 14;
-#define pinButtonCenterBlue = 15;
+#define pinButtonCenter 10
+#define pinLedCenterRed 0
+#define pinLedCenterGreen 13
+#define pinLedCenterBlue 15
 
-#define pinButtonDown = 11;
-#define pinButtonDownLed = 16;
+#define pinButtonDown 11
+#define pinLedDown 16
 
 
 //variables
@@ -55,9 +39,30 @@ boolean StateEndSwitchUp = 0;
 boolean StateEndSwitchDown = 0;
 boolean StateBlocking = 0;
 
+//setup buttons
+OneButton buttonUp(pinButtonUp, true, true);
+OneButton buttonCenter(pinButtonCenter, true, true);
+OneButton buttonDown(pinButtonDown, true, true);
 
-void setup()
-{
+void buttonsTick() {
+  buttonUp.tick();
+  buttonCenter.tick();
+  buttonDown.tick();
+}
+
+void setup() {
+
+
+  //unsigned int timeToClose = 0;
+  //EEPROM.put(0, timeToClose);
+  //Serial.begin(9600);
+  //Serial.println(EEPROM.get(0, timeToClose));
+
+  //setup timer
+  Timer1.initialize(1000000/500);
+  Timer1.attachInterrupt(buttonsTick);
+
+
   //set pins mode
   pinMode(pinEnable, OUTPUT);
   pinMode(pinDirecA, OUTPUT);
@@ -67,33 +72,28 @@ void setup()
   pinMode(pinEndSwitchUp, INPUT_PULLUP);
   pinMode(pinEndSwitchDown, INPUT_PULLUP);
 
-  pinMode(pinButtonUp, INPUT_PULLUP);
-  pinMode(pinButtonUpLed, OUTPUT);
+  pinMode(pinLedUp, OUTPUT);
 
-  pinMode(pinButtonCenter, INPUT_PULLUP);
-  pinMode(pinButtonCenterRed, OUTPUT);
-  pinMode(pinButtonCenterGreen, OUTPUT);
-  pinMode(pinButtonCenterBlue, OUTPUT);
+  pinMode(pinLedCenterRed, OUTPUT);
+  pinMode(pinLedCenterGreen, OUTPUT);
+  pinMode(pinLedCenterBlue, OUTPUT);
 
-  pinMode(pinButtonDown, INPUT_PULLUP);
-  pinMode(pinButtonDownLed, OUTPUT);
+  pinMode(pinLedDown, OUTPUT);
 
   //set pins default state
   digitalWrite(pinEnable, LOW);
   digitalWrite(pinDirecA, LOW);
   digitalWrite(pinDirecB, LOW);
 
-  digitalWrite(pinButtonUpLed, LOW);
+  digitalWrite(pinLedUp, LOW);
 
-  digitalWrite(pinButtonCenterRed, LOW);
-  digitalWrite(pinButtonCenterGreen, LOW);
-  digitalWrite(pinButtonCenterBlue, LOW);
+  digitalWrite(pinLedCenterRed, LOW);
+  digitalWrite(pinLedCenterGreen, HIGH);
+  digitalWrite(pinLedCenterBlue, LOW);
 
-  digitalWrite(pinButtonDownLed, LOW);
+  digitalWrite(pinLedDown, LOW);
 }
 
-
-void loop()
-{
-
+void loop() {
+  
 }
